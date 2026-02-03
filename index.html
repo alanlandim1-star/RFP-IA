@@ -1,0 +1,1209 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>RFP-IA • Análise & Calculadora (FINAL)</title>
+
+  <style>
+    :root{
+      --bg:#020617;
+      --panel:rgba(2,6,23,.78);
+      --card:rgba(15,23,42,.55);
+      --border:rgba(148,163,184,.28);
+      --border2:rgba(148,163,184,.45);
+      --text:#e5e7eb;
+      --muted:#9ca3af;
+      --good:#22c55e;
+      --warn:#f59e0b;
+      --bad:#f97373;
+      --blue:#60a5fa;
+      --shadow:0 50px 150px rgba(0,0,0,.55);
+      --r:22px;
+      --rp:999px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial;
+      color:var(--text);
+      background:
+        radial-gradient(1200px 600px at 20% 20%, rgba(96,165,250,.18), transparent 60%),
+        radial-gradient(900px 600px at 80% 30%, rgba(34,197,94,.12), transparent 60%),
+        radial-gradient(900px 600px at 55% 90%, rgba(245,158,11,.10), transparent 60%),
+        linear-gradient(180deg, #020617, #000);
+    }
+
+    .wrap{max-width:1180px;margin:38px auto;padding:0 18px 46px;}
+    .shell{
+      border:1px solid var(--border);
+      background:linear-gradient(180deg, rgba(2,6,23,.72), rgba(2,6,23,.35));
+      border-radius:34px;
+      padding:26px;
+      box-shadow: var(--shadow);
+      position:relative;
+      overflow:hidden;
+    }
+    .shell:before{
+      content:"";
+      position:absolute; inset:-2px;
+      background:
+        radial-gradient(900px 400px at 10% 10%, rgba(96,165,250,.16), transparent 55%),
+        radial-gradient(900px 400px at 90% 20%, rgba(34,197,94,.14), transparent 55%);
+      pointer-events:none;
+    }
+
+    .topbar{
+      display:flex;align-items:flex-start;justify-content:space-between;
+      gap:16px;position:relative;z-index:1;margin-bottom:18px;
+    }
+    .brand{display:flex;gap:12px;align-items:center;min-width:260px;}
+    .logo{
+      width:44px;height:44px;border-radius:14px;
+      background:
+        radial-gradient(circle at 30% 30%, rgba(96,165,250,.9), rgba(34,197,94,.7)),
+        linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.02));
+      border:1px solid rgba(255,255,255,.12);
+      box-shadow: 0 16px 45px rgba(0,0,0,.45);
+    }
+    h1{font-size:18px;margin:0;letter-spacing:.2px;}
+    .sub{margin:3px 0 0;font-size:12.5px;color:var(--muted);}
+
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;padding:9px 12px;
+      border-radius:var(--rp);
+      border:1px solid var(--border);
+      background:rgba(15,23,42,.35);
+      color:var(--muted);
+      font-size:12px;
+      white-space:nowrap;
+    }
+    .dot{width:10px;height:10px;border-radius:999px;background:var(--good);
+      box-shadow:0 0 0 4px rgba(34,197,94,.12);
+    }
+
+    .grid{display:grid;grid-template-columns: 1.05fr .95fr;gap:16px;position:relative;z-index:1;}
+    @media (max-width: 980px){ .grid{grid-template-columns:1fr} }
+
+    .stack{display:flex;flex-direction:column;gap:16px;}
+
+    .card{
+      border:1px solid var(--border);
+      background: linear-gradient(180deg, rgba(15,23,42,.45), rgba(15,23,42,.28));
+      border-radius:var(--r);
+      padding:18px;
+      box-shadow: 0 26px 90px rgba(0,0,0,.25);
+      position:relative;
+      overflow:hidden;
+    }
+    .card:before{
+      content:"";
+      position:absolute; inset:-2px;
+      background:
+        radial-gradient(500px 260px at 15% 0%, rgba(96,165,250,.12), transparent 55%),
+        radial-gradient(500px 260px at 90% 20%, rgba(34,197,94,.10), transparent 55%);
+      pointer-events:none;
+    }
+    .card > *{position:relative; z-index:1}
+
+    .card h2{
+      margin:0 0 10px;
+      font-size:14px;
+      letter-spacing:.35px;
+      color:#eaf2ff;
+      text-transform:uppercase;
+    }
+    .hint{color:var(--muted);font-size:12.5px;margin:0 0 14px;line-height:1.35;}
+
+    .row{display:grid;grid-template-columns: 1fr 1fr;gap:10px;}
+    @media (max-width: 600px){ .row{grid-template-columns:1fr} }
+
+    label{display:block;font-size:12px;color:var(--muted);margin:10px 0 6px;}
+    input[type="text"], input[type="number"]{
+      width:100%;
+      padding:12px 12px;
+      border-radius:14px;
+      border:1px solid var(--border);
+      background:rgba(2,6,23,.55);
+      color:var(--text);
+      outline:none;
+    }
+    input[type="text"]:focus, input[type="number"]:focus{
+      border-color: rgba(96,165,250,.55);
+      box-shadow: 0 0 0 4px rgba(96,165,250,.10);
+    }
+    input[type="file"]{
+      width:100%;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid var(--border);
+      background:rgba(2,6,23,.55);
+      color:var(--muted);
+    }
+
+    .actions{display:flex;gap:10px;align-items:center;margin-top:14px;flex-wrap:wrap;}
+    .btn{
+      border:none;cursor:pointer;border-radius:var(--rp);
+      padding:12px 14px;font-weight:700;letter-spacing:.2px;
+      color:#071a10;
+      background: linear-gradient(90deg, rgba(34,197,94,1), rgba(34,197,94,.75));
+      box-shadow: 0 16px 50px rgba(34,197,94,.15);
+      min-width: 220px;
+    }
+    .btn:disabled{opacity:.55;cursor:not-allowed;}
+    .btn2{
+      border:1px solid var(--border);
+      background:rgba(2,6,23,.35);
+      color:var(--text);
+      border-radius:var(--rp);
+      padding:10px 12px;
+      cursor:pointer;
+    }
+
+    .status{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:12.5px;color:var(--muted);}
+    .status .ball{width:10px;height:10px;border-radius:999px;background:rgba(148,163,184,.35);box-shadow:0 0 0 4px rgba(148,163,184,.08);}
+    .status.ok{color:#bff7cf}
+    .status.ok .ball{background:var(--good); box-shadow:0 0 0 4px rgba(34,197,94,.12)}
+    .status.err{color:#ffd2d2}
+    .status.err .ball{background:var(--bad); box-shadow:0 0 0 4px rgba(249,115,115,.12)}
+    .status.warn{color:#ffe4b5}
+    .status.warn .ball{background:var(--warn); box-shadow:0 0 0 4px rgba(245,158,11,.12)}
+
+    .resultGrid{display:grid;grid-template-columns: 1fr 1fr;gap:12px;margin-top:14px;}
+    @media (max-width: 980px){ .resultGrid{grid-template-columns:1fr} }
+
+    .kpi{
+      border:1px solid var(--border);
+      background: rgba(2,6,23,.45);
+      border-radius:18px;
+      padding:14px;
+    }
+    .kpi .t{
+      font-size:11px;color:var(--muted);letter-spacing:.3px;text-transform:uppercase;margin:0 0 6px;
+    }
+    .kpi .v{
+      margin:0;font-size:13px;line-height:1.35;white-space:pre-wrap;word-break:break-word;
+    }
+
+    .list{margin:0;padding-left:16px;color:var(--text);font-size:13px;line-height:1.45;}
+    .list li{margin:4px 0}
+
+    pre{
+      margin:12px 0 0;
+      padding:12px;
+      border-radius:16px;
+      border:1px solid var(--border);
+      background:rgba(2,6,23,.60);
+      color:#c7d2fe;
+      font-size:11px;
+      overflow:auto;
+      max-height:260px;
+    }
+
+    .tagline{margin-top:10px;font-size:11.5px;color:var(--muted);}
+
+    .badge{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:8px 10px;border-radius: var(--rp);
+      border:1px solid var(--border);
+      background: rgba(2,6,23,.35);
+      color: var(--muted);
+      font-size: 12px;
+      margin-left:auto;
+      white-space:nowrap;
+    }
+    .badge strong{color:#eaf2ff; font-weight:700}
+    .badge .b{width:9px;height:9px;border-radius:999px;background:var(--blue);
+      box-shadow:0 0 0 4px rgba(96,165,250,.12);
+    }
+
+    .badgeMargin{
+      display:inline-flex;align-items:center;gap:10px;
+      padding:10px 12px;border-radius: var(--rp);
+      border:1px solid var(--border);
+      background: rgba(2,6,23,.35);
+      color: var(--text);
+      font-size: 12px;
+      margin-left:auto;
+      white-space:nowrap;
+    }
+    .badgeMargin .mDot{
+      width:10px;height:10px;border-radius:999px;background:rgba(148,163,184,.35);
+      box-shadow:0 0 0 4px rgba(148,163,184,.10);
+    }
+    .badgeMargin.good .mDot{background:var(--good);box-shadow:0 0 0 4px rgba(34,197,94,.12)}
+    .badgeMargin.warn .mDot{background:var(--warn);box-shadow:0 0 0 4px rgba(245,158,11,.12)}
+    .badgeMargin.bad  .mDot{background:var(--bad); box-shadow:0 0 0 4px rgba(249,115,115,.12)}
+  
+    /* Debug (colapsável, só aparece quando der erro) */
+    .debug-tools{ display:flex; justify-content:flex-end; gap:10px; margin-top:10px; }
+    .debugpanel{
+      margin-top:10px;
+      border:1px solid rgba(148,163,184,.25);
+      border-radius:16px;
+      background:rgba(2,6,23,.55);
+      overflow:hidden;
+      max-height:0;
+      opacity:0;
+      transform:translateY(-6px);
+      transition:max-height .25s ease, opacity .2s ease, transform .2s ease;
+    }
+    .debugpanel.open{
+      max-height:320px;
+      opacity:1;
+      transform:translateY(0);
+    }
+    .debugpanel__head{
+      display:flex; align-items:center; justify-content:space-between;
+      padding:10px 12px;
+      border-bottom:1px solid rgba(148,163,184,.18);
+      color:rgba(229,231,235,.95);
+      font-size:12px;
+      letter-spacing:.04em;
+      text-transform:uppercase;
+    }
+    .debugpanel__close{
+      border:1px solid rgba(148,163,184,.25);
+      background:rgba(2,6,23,.35);
+      color:rgba(229,231,235,.9);
+      border-radius:10px;
+      padding:4px 8px;
+      cursor:pointer;
+    }
+    .debugpanel__close:hover{ border-color:rgba(148,163,184,.45); }
+
+  /* Export */
+.export-card{
+  margin-top: 14px;
+  padding: 14px 14px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: rgba(2,6,23,0.55);
+  box-shadow: inset 0 0 0 1px rgba(148,163,184,0.08);
+}
+.export-head{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom: 10px;
+}
+.export-title{
+  font-weight: 700;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+  font-size: 12px;
+  color: var(--text);
+}
+.export-sub{
+  font-size: 12px;
+  color: var(--text-soft);
+  white-space: nowrap;
+  opacity: .95;
+}
+.export-actions{
+  display:flex;
+  gap:10px;
+  flex-wrap: wrap;
+}
+.btn2.export{
+  min-width: 88px;
+  padding: 9px 14px;
+  border-radius: 999px;
+}
+.btn2.export:disabled{
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+</style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="shell">
+      <div class="topbar">
+        <div class="brand">
+          <div class="logo" aria-hidden="true"></div>
+          <div>
+            <h1>RFP-IA • Análise & Calculadora</h1>
+            <div class="sub">Envie a RFP em PDF e receba um parecer executivo em segundos.</div>
+          </div>
+        </div>
+        <div class="pill"><span class="dot"></span> ATIVO <strong style="color:#eaf2ff;font-weight:700;">Atlas IA</strong></div>
+      </div>
+
+      <div class="grid">
+        <!-- LEFT: Upload + IA -->
+        <div class="card">
+          <h2>Análise de RFP com IA</h2>
+          <p class="hint">
+            Faça o upload do PDF e clique em <b>Rodar análise</b>. Em poucos segundos você verá um resumo executivo, estimativas e alertas prontos para decisão.
+          </p>
+
+          <label for="consultor">Nome do agente / consultor</label>
+          <input id="consultor" type="text" value="Alan Landim" />
+
+          <label for="rfpFile">Arquivo da RFP (PDF)</label>
+          <input id="rfpFile" type="file" accept="application/pdf" />
+
+          <div class="row">
+            <div>
+              <label for="cliente">Nome do cliente (opcional)</label>
+              <input id="cliente" type="text" value="Banco" />
+            </div>
+            <div>
+              <label for="vertical">Vertical (opcional)</label>
+              <input id="vertical" type="text" value="Finanças" />
+            </div>
+          </div>
+
+          <div class="actions">
+            <button id="btnRun" class="btn" type="button" onclick="enviarRfpParaN8n()">Rodar análise da RFP</button>
+            <button class="btn2" type="button" onclick="limparTudo()">Limpar</button>
+            <span class="badge"><span class="b"></span> <strong>IA:</strong> produção</span>
+          </div>
+
+          <div id="statusMsg" class="status">
+            <span class="ball"></span>
+            <span id="statusText">Pronto para rodar.</span>
+          </div>
+
+          <div class="tagline">Você vai receber: resumo executivo, operação sugerida, estimativas (volume/custo/receita), riscos e pontos de atenção.</div>
+<div class="export-card" id="exportCard">
+  <div class="export-head">
+    <div class="export-title">Exportar relatório</div>
+    <div class="export-sub" id="exportHint">Use o último resultado carregado</div>
+  </div>
+  <div class="export-actions">
+    <button type="button" class="btn2 export" id="btnExportCSV" disabled>CSV</button>
+    <button type="button" class="btn2 export" id="btnExportXLS" disabled>Excel</button>
+    <button type="button" class="btn2 export" id="btnExportPDF" disabled>PDF</button>
+  </div>
+</div>
+
+          <div class="debug-tools">
+              <button id="toggleDebug" type="button" class="btn ghost" style="display:none" aria-expanded="false">
+                Ver detalhes técnicos
+              </button>
+            </div>
+            <div id="debugPanel" class="debugpanel" aria-hidden="true">
+              <div class="debugpanel__head">
+                <div class="debugpanel__title">Detalhes técnicos</div>
+                <button id="closeDebug" type="button" class="debugpanel__close" aria-label="Fechar">✕</button>
+              </div>
+              <pre id="debugBox" class="debugbox" tabindex="0"></pre>
+            </div>
+        </div>
+
+        <!-- RIGHT: Resultados + Calculadora -->
+        <div class="stack">
+          <div class="card">
+            <h2>Resultado da análise</h2>
+            <p class="hint">
+              Aqui aparece o resultado da IA: visão executiva, escopo sugerido, números e <b>pontos de atenção</b> para você decidir com segurança.
+            </p>
+
+            <div class="resultGrid">
+              <div class="kpi">
+                <div class="t">Resumo executivo</div>
+                <p id="resumo_executivo" class="v">—</p>
+              </div>
+
+              <div class="kpi">
+                <div class="t">Operação</div>
+                <p class="v"><b>Tipo:</b> <span id="tipo_operacao">—</span></p>
+                <p class="v"><b>Viabilidade:</b> <span id="viabilidade">—</span></p>
+                <p class="v"><b>Margem aprox (%):</b> <span id="margem_aproximada_percentual">—</span></p>
+              </div>
+
+              <div class="kpi">
+                <div class="t">Volume estimado</div>
+                <p class="v"><b>Qtd contatos/mês:</b> <span id="quantidade_contatos_mes">—</span></p>
+                <p class="v"><b>Obs:</b> <span id="volume_observacao">—</span></p>
+              </div>
+
+              <div class="kpi">
+                <div class="t">Escopo operacional</div>
+                <p class="v"><b>Horários:</b> <span id="escopo_horarios">—</span></p>
+                <p class="v"><b>Turnos:</b> <span id="escopo_turnos">—</span></p>
+                <p class="v"><b>Canais:</b></p>
+                <ul id="escopo_canais" class="list"><li>—</li></ul>
+              </div>
+
+              <div class="kpi">
+                <div class="t">Exigências técnicas</div>
+                <ul id="exigencias_tecnicas" class="list"><li>—</li></ul>
+              </div>
+
+              <div class="kpi">
+                <div class="t">Custos estimados</div>
+                <p class="v"><b>Custo op. mensal:</b> <span id="custo_operacional_mensal">—</span></p>
+                <p class="v"><b>Obs:</b> <span id="custos_observacao">—</span></p>
+              </div>
+
+              <div class="kpi">
+                <div class="t">Receita estimada</div>
+                <p class="v"><b>Valor mensal:</b> <span id="valor_mensal">—</span></p>
+                <p class="v"><b>Modelo:</b> <span id="modelo_receita">—</span></p>
+              </div>
+
+              <div class="kpi">
+                <div class="t">Riscos</div>
+                <ul id="principais_riscos" class="list"><li>—</li></ul>
+              </div>
+
+              <div class="kpi" style="grid-column:1/-1;">
+                <div class="t">Pontos de atenção</div>
+                <ul id="pontos_de_atencao" class="list"><li>—</li></ul>
+                <p class="v" style="margin-top:10px;"><b>Justificativa:</b> <span id="justificativa_viabilidade">—</span></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- CALCULADORA -->
+          <div class="card">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div>
+                <h2 style="margin-bottom:6px;">Calculadora de operação</h2>
+                <p class="hint" style="margin:0;">Simule rapidamente volume, receita e custo. Ajuste os inputs e veja os KPIs em tempo real.</p>
+              </div>
+              <div id="badgeMargem" class="badgeMargin warn" title="Margem aproximada">
+                <span class="mDot"></span>
+                <div><b>MARGEM:</b> <span id="badgeMargemTxt">—</span></div>
+              </div>
+            </div>
+
+            <div class="actions" style="margin-top:12px;">
+              <button class="btn2" type="button" onclick="simuladorRapido()">Simulador rápido</button>
+              <button class="btn2" type="button" onclick="resetCalculadora()">Reset</button>
+            </div>
+
+            <div class="row" style="margin-top:8px;">
+              <div>
+                <label for="c_calls_day">Chamadas por agente / dia</label>
+                <input id="c_calls_day" type="number" step="1" value="90" oninput="recalc()" />
+              </div>
+              <div>
+                <label for="c_workdays">Dias trabalhados / mês</label>
+                <input id="c_workdays" type="number" step="1" value="22" oninput="recalc()" />
+              </div>
+
+              <div>
+                <label for="c_shifts">N° de turnos por dia</label>
+                <input id="c_shifts" type="number" step="1" value="1" oninput="recalc()" />
+              </div>
+              <div>
+                <label for="c_agents">Quantidade de agentes</label>
+                <input id="c_agents" type="number" step="1" value="18" oninput="recalc()" />
+              </div>
+
+              <div>
+                <label for="c_aht">Tempo médio de atendimento (min)</label>
+                <input id="c_aht" type="number" step="0.1" value="3.8" oninput="recalc()" />
+              </div>
+              <div>
+                <label for="c_conv">Taxa de conversão (%)</label>
+                <input id="c_conv" type="number" step="0.1" value="8" oninput="recalc()" />
+              </div>
+
+              <div>
+                <label for="c_ticket">Ticket médio (R$)</label>
+                <input id="c_ticket" type="number" step="1" value="350" oninput="recalc()" />
+              </div>
+              <div>
+                <label for="c_cost_min">Custo por minuto de operação (R$)</label>
+                <input id="c_cost_min" type="number" step="0.01" value="0.35" oninput="recalc()" />
+              </div>
+            </div>
+
+            <div class="resultGrid" style="margin-top:14px;">
+              <div class="kpi">
+                <div class="t">Chamadas / mês (total)</div>
+                <p id="k_calls_month" class="v">—</p>
+              </div>
+              <div class="kpi">
+                <div class="t">Vendas / acordos estimados</div>
+                <p id="k_sales" class="v">—</p>
+              </div>
+              <div class="kpi">
+                <div class="t">Receita bruta estimada</div>
+                <p id="k_revenue" class="v">—</p>
+              </div>
+              <div class="kpi">
+                <div class="t">Custo estimado de minutos</div>
+                <p id="k_cost" class="v">—</p>
+              </div>
+              <div class="kpi">
+                <div class="t">Horas de atendimento / mês</div>
+                <p id="k_hours" class="v">—</p>
+              </div>
+              <div class="kpi">
+                <div class="t">Margem bruta aproximada</div>
+                <p id="k_margin" class="v">—</p>
+              </div>
+            </div>
+
+            <div class="tagline">Os cálculos são aproximados (pra dar “cheiro” de viabilidade). Ajustamos fórmula conforme sua regra de negócio.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // =========================================================
+    // COLE AQUI a Production URL EXATA do seu node Webhook
+    // Exemplo: https://n8n.srv1000187.hstgr.cloud/webhook/rfp-ia
+    // =========================================================
+    const WEBHOOK_URL = "https://n8n.srv1000187.hstgr.cloud/webhook/rfp-ia";
+    const LS_KEY_LAST = "rfp_ia_last_response_v1";
+    let __marginOverride = null;
+
+    // ---------------- UI Helpers ----------------
+    function setStatus(msg, type="idle") {
+      const box = document.getElementById("statusMsg");
+      const text = document.getElementById("statusText");
+      if (!box || !text) return;
+      text.textContent = msg;
+
+      box.classList.remove("ok","err","warn");
+      if (type === "ok") box.classList.add("ok");
+      if (type === "err") box.classList.add("err");
+      if (type === "warn") box.classList.add("warn");
+    }
+
+    function showDebug(title, text, opts = {}) {
+      const open = !!opts.open;
+      const toggle = document.getElementById("toggleDebug");
+      const panel  = document.getElementById("debugPanel");
+      const box    = document.getElementById("debugBox");
+      const close  = document.getElementById("closeDebug");
+
+      if (!toggle || !panel || !box) return;
+
+      box.textContent = (title ? (title + "\n\n") : "") + (text || "");
+      toggle.style.display = "inline-flex";
+
+      if (open) {
+        panel.classList.add("open");
+        panel.setAttribute("aria-hidden", "false");
+        toggle.setAttribute("aria-expanded", "true");
+      } else {
+        panel.classList.remove("open");
+        panel.setAttribute("aria-hidden", "true");
+        toggle.setAttribute("aria-expanded", "false");
+      }
+
+      // handlers (idempotentes)
+      if (!toggle.dataset.bound) {
+        toggle.addEventListener("click", () => {
+          const isOpen = panel.classList.toggle("open");
+          panel.setAttribute("aria-hidden", String(!isOpen));
+          toggle.setAttribute("aria-expanded", String(isOpen));
+          if (isOpen) setTimeout(() => box.focus(), 0);
+        });
+        toggle.dataset.bound = "1";
+      }
+      if (close && !close.dataset.bound) {
+        close.addEventListener("click", () => hideDebug());
+        close.dataset.bound = "1";
+      }
+    }
+
+    function hideDebug() {
+      const toggle = document.getElementById("toggleDebug");
+      const panel  = document.getElementById("debugPanel");
+      const box    = document.getElementById("debugBox");
+      if (toggle) { toggle.style.display = "none"; toggle.setAttribute("aria-expanded","false"); }
+      if (panel)  { panel.classList.remove("open"); panel.setAttribute("aria-hidden","true"); }
+      if (box)    { box.textContent = ""; }
+    }
+
+    function fmtMoney(v) {
+      if (v === null || v === undefined || v === "") return "—";
+      const n = Number(v);
+      if (!isFinite(n)) return String(v);
+      return n.toLocaleString("pt-BR", { style:"currency", currency:"BRL" });
+    }
+    function fmtInt(v){
+      const n = Number(v);
+      if (!isFinite(n)) return "—";
+      return Math.round(n).toLocaleString("pt-BR");
+    }
+    function fmtDec(v, d=1){
+      const n = Number(v);
+      if (!isFinite(n)) return "—";
+      return n.toLocaleString("pt-BR", { minimumFractionDigits:d, maximumFractionDigits:d });
+    }
+    function setText(id, value) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.textContent = (value === null || value === undefined || value === "") ? "—" : String(value);
+    }
+    function setList(id, arr) {
+      const ul = document.getElementById(id);
+      if (!ul) return;
+      ul.innerHTML = "";
+      if (!arr || !Array.isArray(arr) || arr.length === 0) {
+        const li = document.createElement("li");
+        li.textContent = "—";
+        ul.appendChild(li);
+        return;
+      }
+      arr.forEach(item => {
+        const li = document.createElement("li");
+        li.textContent = String(item);
+        ul.appendChild(li);
+      });
+    }
+
+    // ---------------- Limpar ----------------
+    function limparTudo() {
+      document.getElementById("rfpFile").value = "";
+      setStatus("Pronto para rodar.", "idle");
+      document.getElementById("debugBox").style.display = "none";
+
+      setText("resumo_executivo","—");
+      setText("tipo_operacao","—");
+      setText("viabilidade","—");
+      setText("margem_aproximada_percentual","—");
+      setText("quantidade_contatos_mes","—");
+      setText("volume_observacao","—");
+      setText("escopo_horarios","—");
+      setText("escopo_turnos","—");
+      setList("escopo_canais", []);
+      setList("exigencias_tecnicas", []);
+      setText("custo_operacional_mensal","—");
+      setText("custos_observacao","—");
+      setText("valor_mensal","—");
+      setText("modelo_receita","—");
+      setList("principais_riscos", []);
+      setList("pontos_de_atencao", []);
+      setText("justificativa_viabilidade","—");
+    }
+
+    // ---------------- Webhook n8n ----------------
+    async function enviarRfpParaN8n() {
+      const btn = document.getElementById("btnRun");
+      const fileInput = document.getElementById("rfpFile");
+      const file = fileInput?.files?.[0];
+
+      const consultor = document.getElementById("consultor")?.value || "";
+      const cliente   = document.getElementById("cliente")?.value || "";
+      const vertical  = document.getElementById("vertical")?.value || "";
+
+      if (!WEBHOOK_URL) {
+        setStatus("WEBHOOK_URL não configurada.", "err");
+        return;
+      }
+      if (!file) {
+        setStatus("Selecione um PDF antes de rodar a análise.", "warn");
+        return;
+      }
+
+      const fd = new FormData();
+      fd.append("file", file, file.name);
+      fd.append("consultor", consultor);
+      fd.append("cliente", cliente);
+      fd.append("vertical", vertical);
+      fd.append("agent", "atlas-ia");
+      fd.append("origin", "rfp-ia-frontend");
+      fd.append("filename", file.name);
+
+      setStatus("Enviando para o webhook... (aguarde)", "warn");
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(WEBHOOK_URL, { method: "POST", body: fd });
+        const raw = await res.text();
+
+        console.log("HTTP", res.status, res.statusText);
+        console.log("RAW RESPONSE:", raw);
+        hideDebug();
+
+        const debugPack = `HTTP ${res.status} ${res.statusText}\n\nRAW:\n${raw}`;
+
+        if (!res.ok) {
+          showDebug("Falha no webhook", debugPack, { open: true });
+          setStatus(`Falha no webhook (HTTP ${res.status}).`, "err");
+          return;
+        }
+
+        let data = tryParseJson(raw);
+        if (!data) {
+          showDebug("Resposta não-JSON", debugPack, { open: true });
+          setStatus("Resposta não é JSON válido.", "err");
+          return;
+        }
+
+        const payload = data || {};
+        const analysis = extractAnalysis(payload);
+        if (!analysis || typeof analysis !== "object") {
+          showDebug("Retorno sem objeto de análise", `JSON recebido:\n${JSON.stringify(payload, null, 2)}`, { open: true });
+          setStatus("Não encontrei o objeto de análise no retorno.", "warn");
+          return;
+        }
+
+        saveLastAnalysis({ ts: Date.now(), http: res.status, payload, analysis });
+        renderAnalysis(analysis);
+
+        // Atualiza a calculadora automaticamente se o n8n devolver esse bloco
+        applyCalculatorFromPayload(payload, analysis);
+
+        setStatus("Análise recebida ✅ Renderizada no painel.", "ok");
+
+      } catch (err) {
+        console.error(err);
+        setStatus("Erro ao chamar o webhook. Verifique URL / CORS / rede. Veja o console.", "err");
+        showDebug("Erro (exception)", String(err && (err.stack || err.message || err)), { open: true });
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    function renderAnalysis(a) {
+      setText("resumo_executivo", a?.resumo_executivo);
+      setText("tipo_operacao", a?.tipo_operacao);
+      setText("viabilidade", a?.viabilidade);
+      setText("justificativa_viabilidade", a?.justificativa_viabilidade);
+
+      setText("margem_aproximada_percentual", a?.margem_aproximada_percentual);
+
+      const qtd = a?.volume_estimado?.quantidade_contatos_mes ?? a?.quantidade_contatos_mes;
+      setText("quantidade_contatos_mes", qtd);
+      setText("volume_observacao", a?.volume_estimado?.observacao ?? a?.observacao);
+
+      setText("escopo_horarios", a?.escopo_operacional?.horarios);
+      setText("escopo_turnos", a?.escopo_operacional?.turnos);
+      setList("escopo_canais", a?.escopo_operacional?.canais);
+
+      setList("exigencias_tecnicas", a?.exigencias_tecnicas);
+
+      const custoMensal = a?.custos_estimados?.custo_operacional_mensal ?? a?.custo_operacional_mensal;
+      setText("custo_operacional_mensal", fmtMoney(custoMensal));
+      setText("custos_observacao", a?.custos_estimados?.observacao ?? "");
+
+      const valMensal = a?.receita_estimada?.valor_mensal ?? a?.valor_mensal;
+      setText("valor_mensal", fmtMoney(valMensal));
+      setText("modelo_receita", a?.receita_estimada?.modelo ?? a?.modelo ?? "");
+
+      setList("principais_riscos", a?.principais_riscos);
+      setList("pontos_de_atencao", a?.pontos_de_atencao);
+
+      console.log("PARSED JSON:", a);
+    }
+
+    
+      // ---------------- Auto-sync da calculadora com o resultado do n8n ----------------
+      function applyCalculatorFromPayload(payload, analysis) {
+        // Prioridade: payload.calculadora.inputs_usados (ou payload.calculadora.inputs)
+        const calc = payload && payload.calculadora ? payload.calculadora : null;
+        const inputs = calc ? (calc.inputs_usados || calc.inputs || calc) : null;
+
+        // IDs dos inputs (do HTML)
+        const elCallsDay   = document.getElementById("c_calls_day");
+        const elWorkDays   = document.getElementById("c_workdays");
+        const elShifts     = document.getElementById("c_shifts");
+        const elAgents     = document.getElementById("c_agents");
+        const elAht        = document.getElementById("c_aht");
+        const elConv       = document.getElementById("c_conv");
+        const elTicket     = document.getElementById("c_ticket");
+        const elCostMin    = document.getElementById("c_cost_min");
+
+        const setIf = (el, v) => {
+          if (!el) return;
+          if (v === undefined || v === null || v === "") return;
+          el.value = String(v).replace(".", ","); // UI BR
+        };
+
+        // Mapeamento mais comum vindo do n8n
+        if (inputs) {
+          setIf(elCallsDay, inputs.chamadas_por_agente_dia ?? inputs.calls_per_agent_day ?? inputs.calls_day);
+          setIf(elWorkDays, inputs.dias_trabalhados_mes ?? inputs.workdays_month ?? inputs.workdays);
+          setIf(elShifts,   inputs.turnos_por_dia ?? inputs.shifts_day ?? inputs.shifts);
+          setIf(elAgents,   inputs.quantidade_agentes ?? inputs.agents ?? inputs.num_agents);
+          setIf(elAht,      inputs.tma_minutos ?? inputs.aht_min ?? inputs.tma);
+          setIf(elConv,     inputs.taxa_conversao_pct ?? inputs.conversion_pct ?? inputs.conversion);
+          setIf(elTicket,   inputs.ticket_medio ?? inputs.avg_ticket ?? inputs.ticket);
+          setIf(elCostMin,  inputs.custo_minuto ?? inputs.cost_per_minute ?? inputs.cost_min);
+          if (typeof recalcCalculator === "function") recalcCalculator();
+          return;
+        }
+
+        // Fallback: se não vier calculadora, tenta inferir chamadas/dia a partir do volume do analysis
+        // Ex.: analysis.volume_estimado.quantidade_contatos_mes
+        try {
+          const qtdMes = analysis?.volume_estimado?.quantidade_contatos_mes ?? analysis?.volume_estimado?.quantidade_contatos ?? analysis?.quantidade_contatos_mes;
+          if (qtdMes && elAgents && elWorkDays && elShifts && elCallsDay) {
+            const agents = parseFloat(String(elAgents.value).replace(",", ".")) || 0;
+            const days   = parseFloat(String(elWorkDays.value).replace(",", ".")) || 0;
+            const shifts = parseFloat(String(elShifts.value).replace(",", ".")) || 1;
+            if (agents > 0 && days > 0) {
+              const callsDay = Math.round((Number(qtdMes) / (agents * days * shifts)) * 10) / 10;
+              setIf(elCallsDay, callsDay);
+              if (typeof recalcCalculator === "function") recalcCalculator();
+            }
+          }
+        } catch(e) {}
+      }
+
+
+// ---------------- Robust JSON + persistência ----------------
+    function normalizeRaw(raw) {
+      let s = String(raw ?? "").trim();
+      if (s.startsWith("=")) s = s.slice(1).trim();
+      return s;
+    }
+    function tryParseJson(raw) {
+      const s = normalizeRaw(raw);
+      try { return JSON.parse(s); } catch { return null; }
+    }
+    function extractAnalysis(data) {
+      if (!data) return null;
+      let a = data.analysis || data.output || data.data || data;
+      if (typeof a === "string") {
+        const a2 = tryParseJson(a);
+        if (a2 && typeof a2 === "object") a = a2;
+      }
+      return a;
+    }
+    function saveLastAnalysis(payload) {
+      try { localStorage.setItem(LS_KEY_LAST, JSON.stringify(payload));
+        setExportEnabled(true); } catch {}
+    }
+
+// =========================
+// EXPORTAÇÃO (CSV / Excel / PDF)
+// =========================
+function getLastResult(){
+  const raw = localStorage.getItem(LS_KEY_LAST);
+  if(!raw) return null;
+  try { return JSON.parse(raw); } catch(e){ return null; }
+}
+function setExportEnabled(enabled){
+  ["btnExportCSV","btnExportXLS","btnExportPDF"].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.disabled = !enabled;
+  });
+  const hint = document.getElementById("exportHint");
+  if(hint){
+    hint.textContent = enabled ? "Use o último resultado carregado" : "Rode uma análise para liberar exportação";
+  }
+}
+function collectExportRows(payload){
+  // Export em formato simples e robusto (Campo / Valor)
+  const rows = [];
+  const now = new Date();
+  rows.push(["Gerado em", now.toLocaleString("pt-BR")]);
+
+  const agente = (document.getElementById("inpAgente")||{}).value || "";
+  const cliente = (document.getElementById("inpCliente")||{}).value || "";
+  const vertical = (document.getElementById("inpVertical")||{}).value || "";
+  if(agente) rows.push(["Agente/Consultor", agente]);
+  if(cliente) rows.push(["Cliente (informado)", cliente]);
+  if(vertical) rows.push(["Vertical (informada)", vertical]);
+
+  const a = (payload && payload.analysis) ? payload.analysis : (payload||{});
+  const pick = (obj, path) => path.split(".").reduce((acc,k)=> (acc && acc[k]!==undefined ? acc[k] : undefined), obj);
+
+  const map = [
+    ["Resumo executivo", "resumo_executivo"],
+    ["Operação - Tipo", "operacao.tipo"],
+    ["Operação - Viabilidade", "operacao.viabilidade"],
+    ["Operação - Margem aprox (%)", "operacao.margem_aprox_pct"],
+    ["Volume - Qtd contatos/mês", "volume_estimado.qtd_contatos_mes"],
+    ["Volume - Observações", "volume_estimado.obs"],
+    ["Escopo - Horários", "escopo_operacional.horarios"],
+    ["Escopo - Turnos", "escopo_operacional.turnos"],
+    ["Escopo - Canais", "escopo_operacional.canais"],
+    ["Exigências técnicas", "exigencias_tecnicas"],
+    ["Custos - Custo op. mensal", "custos_estimados.custo_op_mensal"],
+    ["Custos - Observações", "custos_estimados.obs"],
+    ["Receita - Valor mensal", "receita_estimada.valor_mensal"],
+    ["Receita - Modelo", "receita_estimada.modelo"],
+    ["Riscos", "riscos"],
+    ["Pontos de atenção", "pontos_de_atencao"],
+    ["Justificativa", "justificativa"]
+  ];
+
+  for(const [label, path] of map){
+    const v = pick(a, path);
+    if(v === undefined || v === null) continue;
+    if(Array.isArray(v)){
+      rows.push([label, v.join(" | ")]);
+    } else if(typeof v === "object"){
+      // objetos pequenos -> JSON curto
+      rows.push([label, JSON.stringify(v)]);
+    } else {
+      rows.push([label, String(v)]);
+    }
+  }
+  return rows;
+}
+function downloadBlob(filename, mime, content){
+  const blob = new Blob([content], {type: mime});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 2500);
+}
+function toCSV(rows){
+  const esc = (s)=>('"'+String(s).replaceAll('"','""')+'"');
+  return rows.map(r=>r.map(esc).join(";")).join("\n");
+}
+function exportCSV(){
+  const payload = getLastResult();
+  if(!payload){ toast("Rode uma análise antes de exportar.", true); return; }
+  const rows = collectExportRows(payload);
+  downloadBlob("RFP-IA_relatorio.csv", "text/csv;charset=utf-8", toCSV(rows));
+}
+function exportExcel(){
+  const payload = getLastResult();
+  if(!payload){ toast("Rode uma análise antes de exportar.", true); return; }
+  const rows = collectExportRows(payload);
+
+  const safe = (s)=>String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+  const trs = rows.map(([k,v])=>`<tr><td style="font-weight:700">${safe(k)}</td><td>${safe(v)}</td></tr>`).join("");
+  const html = `<!doctype html><html><head><meta charset="utf-8"><title>Relatório RFP-IA</title></head>
+  <body><table border="1" cellspacing="0" cellpadding="6">${trs}</table></body></html>`;
+  downloadBlob("RFP-IA_relatorio.xls", "application/vnd.ms-excel;charset=utf-8", html);
+}
+function exportPDF(){
+  const payload = getLastResult();
+  if(!payload){ toast("Rode uma análise antes de exportar.", true); return; }
+  const rows = collectExportRows(payload);
+
+  // Janela de impressão (sem injetar tag de script dentro do script atual)
+  const w = window.open("", "_blank");
+  if(!w){ toast("Seu navegador bloqueou o popup do PDF.", true); return; }
+
+  const safe = (s)=>String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+  const trs = rows.map(([k,v])=>`<tr><td class="k">${safe(k)}</td><td class="v">${safe(v)}</td></tr>`).join("");
+
+  w.document.open();
+  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Relatório RFP-IA</title>
+    <style>
+      body{ font-family: Arial, sans-serif; margin: 18px; }
+      h1{ font-size: 16px; margin: 0 0 10px; }
+      table{ width:100%; border-collapse: collapse; }
+      td{ border:1px solid #cbd5e1; padding:8px; font-size: 12px; vertical-align: top; }
+      td.k{ width: 32%; font-weight: 700; background:#f8fafc; }
+      .muted{ color:#475569; font-size: 11px; margin-bottom: 10px; }
+    </style></head>
+    <body>
+      <h1>Relatório RFP-IA</h1>
+      <div class="muted">Gerado automaticamente pelo RFP-IA • Análise &amp; Calculadora</div>
+      <table>${trs}</table>
+    </body></html>`);
+  w.document.close();
+
+  // Imprime depois que a janela renderiza
+  w.focus();
+  setTimeout(()=>{
+    try{ w.print(); } finally { /* não fechar automaticamente */ }
+  }, 450);
+}
+function bindExportButtons(){
+  const b1 = document.getElementById("btnExportCSV");
+  const b2 = document.getElementById("btnExportXLS");
+  const b3 = document.getElementById("btnExportPDF");
+  if(b1) b1.addEventListener("click", exportCSV);
+  if(b2) b2.addEventListener("click", exportExcel);
+  if(b3) b3.addEventListener("click", exportPDF);
+}
+
+
+    function loadLastAnalysis() {
+      try {
+        const s = localStorage.getItem(LS_KEY_LAST);
+        if (!s) return null;
+        return JSON.parse(s);
+      } catch { return null; }
+    }
+    function clearLastAnalysis() {
+      try { localStorage.removeItem(LS_KEY_LAST); } catch {}
+    }
+
+    // -------- Sync da calculadora com a análise (se a IA retornar volume/custo/receita/margem) --------
+    function syncCalculatorFromAnalysis(a) {
+      if (!a || typeof a !== "object") return;
+
+      const qtdMes =
+        a?.volume_estimado?.quantidade_contatos_mes ??
+        a?.quantidade_contatos_mes ??
+        null;
+
+      const receitaMensal =
+        a?.receita_estimada?.valor_mensal ??
+        a?.valor_mensal ??
+        null;
+
+      const custoMensal =
+        a?.custos_estimados?.custo_operacional_mensal ??
+        a?.custo_operacional_mensal ??
+        null;
+
+      const margemIA =
+        a?.margem_aproximada_percentual ??
+        null;
+
+      const workDays = n("c_workdays") || 22;
+      const shifts   = Math.max(1, n("c_shifts") || 1);
+      const agents   = n("c_agents") || 18;
+
+      const denom = workDays * shifts * agents;
+
+      // 1) calls/day para bater com volume mensal
+      if (Number.isFinite(Number(qtdMes)) && denom > 0) {
+        const callsDay = Number(qtdMes) / denom;
+        if (Number.isFinite(callsDay) && callsDay > 0) {
+          document.getElementById("c_calls_day").value = Math.max(1, Math.round(callsDay));
+        }
+      }
+
+      // Recalcula volume mensal com o novo calls/day
+      const callsDayNow = n("c_calls_day") || 30;
+      const callsMonthNow = callsDayNow * agents * workDays * shifts;
+
+      // 2) ticket para bater com receita (mantendo conv%)
+      const convPct = n("c_conv") || 8;
+      const salesNow = callsMonthNow * (convPct/100);
+      if (Number.isFinite(Number(receitaMensal)) && salesNow > 0) {
+        const ticket = Number(receitaMensal) / salesNow;
+        if (Number.isFinite(ticket) && ticket > 0) {
+          document.getElementById("c_ticket").value = Math.max(1, Math.round(ticket));
+        }
+      }
+
+      // 3) custo/min para bater com custo mensal (mantendo TMA)
+      const ahtMin = Number(String(document.getElementById("c_aht").value).replace(",", ".")) || 3.8;
+      const minutesNow = callsMonthNow * ahtMin;
+      if (Number.isFinite(Number(custoMensal)) && minutesNow > 0) {
+        const costMin = Number(custoMensal) / minutesNow;
+        if (Number.isFinite(costMin) && costMin > 0) {
+          document.getElementById("c_cost_min").value = Number(costMin).toFixed(2).replace(".", ",");
+        }
+      }
+
+      // 4) margem IA no badge (se vier)
+      __marginOverride = Number.isFinite(Number(margemIA)) ? Number(margemIA) : null;
+
+      recalc();
+    }
+
+
+// ---------------- Calculadora ----------------
+    function n(id){
+      const v = Number(document.getElementById(id)?.value ?? 0);
+      return Number.isFinite(v) ? v : 0;
+    }
+
+    function recalc(){
+      // Inputs
+      const callsDay   = n("c_calls_day");
+      const workdays   = n("c_workdays");
+      const shifts     = Math.max(1, n("c_shifts"));
+      const agents     = n("c_agents");
+      const ahtMin     = n("c_aht");
+      const convPct    = n("c_conv");
+      const ticket     = n("c_ticket");
+      const costMin    = n("c_cost_min");
+
+      // Chamadas/mês: (calls/agent/day) * agents * workdays * shifts
+      const callsMonth = callsDay * agents * workdays * shifts;
+
+      // Vendas/acordos
+      const sales = callsMonth * (convPct/100);
+
+      // Receita
+      const revenue = sales * ticket;
+
+      // Minutos totais
+      const totalMinutes = callsMonth * ahtMin;
+
+      // Custo de minutos
+      const cost = totalMinutes * costMin;
+
+      // Horas
+      const hours = totalMinutes / 60;
+
+      // Margem
+      const margin = revenue - cost;
+      const marginPct = (Number.isFinite(__marginOverride)) ? __marginOverride : (revenue > 0 ? (margin / revenue) * 100 : 0);
+
+      // Render KPIs
+      document.getElementById("k_calls_month").textContent = fmtInt(callsMonth);
+      document.getElementById("k_sales").textContent = fmtInt(sales);
+      document.getElementById("k_revenue").textContent = fmtMoney(revenue);
+      document.getElementById("k_cost").textContent = fmtMoney(cost);
+      document.getElementById("k_hours").textContent = `${fmtDec(hours,1)} h/mês`;
+      document.getElementById("k_margin").textContent = `${fmtMoney(margin)} (${fmtDec(marginPct,0)}%)`;
+
+      // Badge margem
+      const badge = document.getElementById("badgeMargem");
+      const txt = document.getElementById("badgeMargemTxt");
+      txt.textContent = `${fmtDec(marginPct,0)}%`;
+
+      badge.classList.remove("good","warn","bad");
+      if (marginPct >= 30) badge.classList.add("good");
+      else if (marginPct >= 10) badge.classList.add("warn");
+      else badge.classList.add("bad");
+    }
+
+    function simuladorRapido(){
+      document.getElementById("c_calls_day").value = 90;
+      document.getElementById("c_workdays").value = 22;
+      document.getElementById("c_shifts").value = 1;
+      document.getElementById("c_agents").value = 18;
+      document.getElementById("c_aht").value = 3.8;
+      document.getElementById("c_conv").value = 8;
+      document.getElementById("c_ticket").value = 350;
+      document.getElementById("c_cost_min").value = 0.35;
+      recalc();
+    }
+
+    function resetCalculadora(){
+      document.getElementById("c_calls_day").value = "";
+      document.getElementById("c_workdays").value = "";
+      document.getElementById("c_shifts").value = "";
+      document.getElementById("c_agents").value = "";
+      document.getElementById("c_aht").value = "";
+      document.getElementById("c_conv").value = "";
+      document.getElementById("c_ticket").value = "";
+      document.getElementById("c_cost_min").value = "";
+      recalc();
+    }
+
+    // Live update calculadora
+    ["c_calls_day","c_workdays","c_shifts","c_agents","c_aht","c_conv","c_ticket","c_cost_min"].forEach((id)=>{
+      const el = document.getElementById(id);
+      if (el) el.addEventListener("input", ()=>{ __marginOverride = null; recalc(); });
+    });
+
+    // Boot: inicia calculadora e carrega última análise (cache local), se existir
+    recalc();
+    const last = loadLastAnalysis();
+    if (last?.analysis) {
+      try {
+        renderAnalysis(last.analysis);
+        applyCalculatorFromPayload(last.payload || {}, last.analysis);
+        setStatus("Última análise carregada (cache local).", "ok");
+      } catch (e) {
+        console.warn("Falha ao restaurar cache:", e);
+      }
+    }
+  
+
+// Init
+bindExportButtons();
+setExportEnabled(!!getLastResult());
+</script>
+</body>
+</html>
