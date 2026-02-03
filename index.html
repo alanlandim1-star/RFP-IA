@@ -1194,7 +1194,7 @@ function bindExportButtons(){
       try {
         renderAnalysis(last.analysis);
         applyCalculatorFromPayload(last.payload || {}, last.analysis);
-        setStatus("Última análise carregada (cache local).", "ok");
+        setStatus("Última análise carregada (OK).", "ok");
       } catch (e) {
         console.warn("Falha ao restaurar cache:", e);
       }
